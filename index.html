@@ -12,18 +12,24 @@
     <button id="buttonGet">GET</button>
     <button id="buttonUpdate">UPDATE</button>
     <p id="ausgabe">Ausgabe</p>
+    <table id='customers'>
 
+    </table>
     <script>
         class RestClient {
+
+            constructor(urlApi){
+                this.urlApi = urlApi;
+            }
+
             async  getData() {
-                const response = await fetch('https://api.predic8.de/shop/products/57');
+                const response = await fetch(this.urlApi);
                 const myJSON = await response.json();
-                const name = myJSON.name;
-                return name;
+                return myJSON;
             }
 
             updateData() {
-                fetch('https://api.predic8.de/shop/products/57', {
+                fetch(this.urlApi, {
                     method: 'PATCH',
                     headers: {
                         'Accept': 'application/json',
@@ -34,19 +40,43 @@
             }
         }
 
-        const restClient = new RestClient();
+        const restClient = new RestClient('https://api.predic8.de/shop/customers/?limit=100');
 
-        function display(text) {
-            ausgabe.innerText = text;
-        }
 
         const buttonGet = document.getElementById('buttonGet');
         const buttonUpdate = document.getElementById('buttonUpdate');
         const ausgabe = document.getElementById('ausgabe');
+        const table = document.getElementById('customers');
 
-        buttonGet.addEventListener('click', async function () {
-            const name = await restClient.getData();
-            display(name);
+
+        async function generateTable() {
+            const json = await restClient.getData();
+            let customers = json.customers;
+
+            let innerHtml = "";
+            customers.forEach(element => {
+                innerHtml += "<tr>";
+                innerHtml += "<td>";
+                innerHtml += element.firstname;
+                innerHtml += "</td>";
+                innerHtml += "<td>";
+                innerHtml += element.lastname;
+                innerHtml += "</td>";
+                innerHtml += "</tr>";
+            });            
+            display(innerHtml);
+        }
+
+        function display(text){
+            table.innerHTML = text;
+        }
+
+        window.onload = generateTable();
+        
+
+
+        buttonGet.addEventListener('click', function () {
+            generateTable();
         });
 
         buttonUpdate.addEventListener('click', function () {
